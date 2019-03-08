@@ -38,6 +38,15 @@ def read_of_header(c):
     cur = c.recv(8)
     return parse_of_header(cur) - 8, cur
 
+def feature_req():
+    return "%s%s%s%s%s%s%s%s"%(chr(1),chr(5),chr(0),chr(8),chr(0),chr(0),chr(1),chr(240))
+
+def connect_to_floodlight():
+    s = socket.socket()
+    port = 6653
+    host = '127.0.0.1'
+    s.connect((host, port))
+    return s
 
 def responde_to_mininet_connection(s):
     c,addr = s.accept()  # Establish connection with socket.
@@ -56,3 +65,28 @@ while True:
     payload_size , cur = read_of_header(c)
     print (payload_size)
     c.send(cur)
+    c.send(feature_req())
+    payload_size , cur = read_of_header(c)
+    print (payload_size)
+    c.recv(payload_size)
+    payload_size , cur = read_of_header(c)
+    print (payload_size)
+    c.recv(payload_size)
+    
+    '''
+    print ( "start floodlight part.")
+    f = connect_to_floodlight()
+    f.send(cur)
+    payload_size , cur = read_of_header(f)
+    c.send(cur)
+    print ( "done floodlight part.")
+
+    payload_size , cur = read_of_header(f)
+
+    c.send(feature_req())
+    payload_size , cur = read_of_header(c)
+    c.recv(payload_size)
+    for i in range(0,4):
+        payload_size , cur = read_of_header(c)
+        c.recv(payload_size)
+    '''
